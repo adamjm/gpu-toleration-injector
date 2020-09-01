@@ -33,6 +33,7 @@ func mutate(request v1beta1.AdmissionRequest) (v1beta1.AdmissionResponse, error)
 		if limit, ok := container.Resources.Requests["nvidia.com/gpu"]; ok {
 			if !limit.IsZero() {
 				hasGPU = true
+				gpuCount = limit
 				break
 			}
 		}
@@ -45,15 +46,10 @@ func mutate(request v1beta1.AdmissionRequest) (v1beta1.AdmissionResponse, error)
 		response.PatchType = &patch
 
 		response.AuditAnnotations = map[string]string{
-			"gpu-admission-controller": "Added dedicated=gpu toleration",
+			"cpu-guarentee-admission-controller": "Added dedicated=CPU Count",
 		}
 
-		toleration := v1.Toleration{
-			Key:      "dedicated",
-			Value:    "gpu",
-			Operator: v1.TolerationOpEqual,
-			Effect:   v1.TaintEffectNoSchedule,
-		}
+		//add resouces need functions for limits and requests 
 
 		patches := []map[string]interface{}{
 			{
